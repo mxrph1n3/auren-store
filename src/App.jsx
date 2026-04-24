@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // --- ICONS ---
 const HomeIcon = ({ active }) => (
@@ -19,8 +19,8 @@ const BrandsIcon = ({ active }) => (
   </svg>
 );
 
-const SearchIcon = ({ active }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "1.5"} strokeLinecap="round" strokeLinejoin="round" className={`transition-all duration-500 ease-out ${active ? 'text-black' : 'text-black/50 hover:text-black/80'}`}>
+const SearchIcon = ({ active, className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "1.5"} strokeLinecap="round" strokeLinejoin="round" className={className || `transition-all duration-500 ease-out ${active ? 'text-black' : 'text-black/50 hover:text-black/80'}`}>
     <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
   </svg>
 );
@@ -39,7 +39,7 @@ const CartIcon = ({ active, count }) => (
 );
 
 const XIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
@@ -48,9 +48,9 @@ const XIcon = () => (
 // --- BRANDS DATA ---
 const FEATURED_BRANDS = [
   { name: "GUESS", image: "https://images.unsplash.com/photo-1511130558090-00af810c2111?w=800&q=80" },
+  { name: "NIKE", image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=80" },
   { name: "BALENCIAGA", image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=800&q=80" },
   { name: "VETEMENTS", image: "https://images.unsplash.com/photo-1509506489701-5e5d338cc01b?w=800&q=80" },
-  { name: "NIKE", image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=80" },
 ];
 
 const ALL_BRANDS_LIST = [
@@ -62,136 +62,324 @@ const ALL_BRANDS_LIST = [
   "SACAI", "SAINT LAURENT", "SALOMON", "STONE ISLAND", "STÜSSY", "THOM BROWNE", "TOM FORD", "UNDERCOVER", "VALENTINO", "VERSACE", "VETEMENTS", "Y-3", "YEEZY", "YOHJI YAMAMOTO"
 ];
 
-// --- MASSIVE PRODUCTS DATABASE ---
+// --- URL COMPRESSION ENGINE ---
+const n = (ids, t, u='9ddf04c7-2a9a-4d76-add1-d15af8f0263d') => ids.split(',').map(id => `https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_${u},c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/${id}/${t}.png`);
+const nby = (ids, t) => ids.split(',').map(id => `https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto/${id}/${t}.png`); 
+const nr = (ids, path) => ids.split(',').map(id => `https://static.nike.com/a/images/w_960,q_auto,f_auto/${id}/${path}.jpg`);
+const g = (b, v) => v.split(',').map(x => `https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/${b}${x==='0'?'':'-ALT'+x}`);
+
+// --- MASSIVE PRODUCTS DATABASE (192 ITEMS) ---
 const MOCK_PRODUCTS = [
-  {
-    id: "p1", brand: "GUESS", title: "Boxy Iconic T-Shirt", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women",
-    description: "Classic boxy fit iconic t-shirt.",
-    colors: [
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT3", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT4", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT5", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_501,ar_2:3,c_fill/v1/EU/Style/ECOMM/W4YI73K8HM0-G011-ALT6"] }
-    ]
-  },
-  {
-    id: "p2", brand: "GUESS", title: "T-Shirt kleines Logo-Dreieck", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men",
-    description: "Minimalist t-shirt with small triangle logo detail.",
-    colors: [
-      { name: "Light Brown", hex: "#D2B48C", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G1CA", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G1CA-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G1CA-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G1CA-ALT3"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI0AKCCM1-G011-ALT3"] }
-    ]
-  },
-  {
-    id: "p3", brand: "GUESS", title: "Scuba-Poloshirt-Sweatshirt", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women",
-    description: "Modern scuba-fabric polo sweatshirt with a relaxed fit.",
-    colors: [
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6RQ05KD122-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6RQ05KD122-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6RQ05KD122-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6RQ05KD122-JBLK-ALT3"] }
-    ]
-  },
-  {
-    id: "p4", brand: "GUESS", title: "Langarm-T-Shirt Waffelmuster Mini-Dreieck", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men",
-    description: "Comfortable waffle-knit long sleeve t-shirt.",
-    colors: [
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-JBLK-ALT3"] },
-      { name: "Cream", hex: "#FFFDD0", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-G053", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-G053-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-G053-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-G053-ALT3", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4BI77KCII1-G053-ALT4"] }
-    ]
-  },
-  {
-    id: "p5", brand: "GUESS", title: "Besticktes T-Shirt", price: 55.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men",
-    description: "Premium embroidered t-shirt.",
-    colors: [
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-JBLK-ALT3"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6GI13K2995-G011-ALT3"] }
-    ]
-  },
-  {
-    id: "p6", brand: "GUESS", title: "T-Shirt Print", price: 27.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women",
-    description: "Statement print t-shirt.",
-    colors: [
-      { name: "Cream", hex: "#FFFDD0", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5BI50KA0Q1-G9L9", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5BI50KA0Q1-G9L9-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5BI50KA0Q1-G9L9-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5BI50KA0Q1-G9L9-ALT3"] }
-    ]
-  },
-  {
-    id: "p7", brand: "GUESS", title: "Oversized T-Shirt Mini-Patch", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men",
-    description: "Oversized fit t-shirt with mini patch.",
-    colors: [
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G011-ALT3"] },
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK-ALT3", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK-ALT4", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-JBLK-ALT5"] },
-      { name: "Olive Green", hex: "#556B2F", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G8EV", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G8EV-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G8EV-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G8EV-ALT3"] },
-      { name: "Beige", hex: "#F5F5DC", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G1W7", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G1W7-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G1W7-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M4YI46K8FQ4-G1W7-ALT3"] }
-    ]
-  },
-  {
-    id: "p8", brand: "GUESS", title: "Triangel-Logo Stretch-T-Shirt", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women",
-    description: "Stretch t-shirt with classic triangle logo.",
-    colors: [
-      { name: "Grey", hex: "#808080", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-LMGY", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-LMGY-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-LMGY-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-LMGY-ALT3"] },
-      { name: "Beige", hex: "#F5F5DC", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G67C", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G67C-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G67C-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G67C-ALT3"] },
-      { name: "Sky Blue", hex: "#87CEEB", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G7S1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G7S1-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G7S1-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G7S1-ALT3"] },
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-JBLK-ALT3"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W2YI45J1314-G011-ALT3"] }
-    ]
-  },
-  {
-    id: "p9", brand: "GUESS", title: "Rippstrick-Tanktop", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women",
-    description: "Essential ribbed knit tank top.",
-    colors: [
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT3", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT4", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT5", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT6", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-JBLK-ALT7"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT3", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT4", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT5", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT6", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5YR10Z0130-G012-ALT7"] }
-    ]
-  },
-  {
-    id: "p10", brand: "GUESS", title: "Cropped Top floraler Print", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women",
-    description: "Vibrant floral-print crop top perfect for summer evenings.",
-    colors: [
-      { name: "Multi Brown", hex: "#8B4513", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIC", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIC-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIC-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIC-ALT3"] },
-      { name: "Multi Green", hex: "#228B22", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIE", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIE-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W5GH74WH9Z2-PMIE-ALT2"] }
-    ]
-  },
-  {
-    id: "p11", brand: "GUESS", title: "Wildleder-Minirock", price: 99.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women",
-    description: "Premium suede mini skirt with a flattering fit.",
-    colors: [
-      { name: "Green", hex: "#008000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G8B6", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G8B6-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G8B6-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G8B6-ALT3"] },
-      { name: "Yellow", hex: "#FFD700", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G281", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G281-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G281-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-G281-ALT3"] },
-      { name: "Light Blue", hex: "#ADD8E6", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A71N", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A71N-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A71N-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A71N-ALT3"] },
-      { name: "Pink", hex: "#FFC0CB", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A61L", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A61L-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A61L-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6PD2CWV110-A61L-ALT3"] }
-    ]
-  },
-  {
-    id: "p12", brand: "GUESS", title: "Strick-T-Shirt", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men",
-    description: "Textured knit t-shirt.",
-    colors: [
-      { name: "Black", hex: "#000000", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-JBLK", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-JBLK-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-JBLK-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-JBLK-ALT3"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-G046", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-G046-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-G046-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/M6RP14KD461-G046-ALT3"] }
-    ]
-  },
-  {
-    id: "p13", brand: "GUESS", title: "Besticktes Logo Tanktop", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women",
-    description: "Tank top with delicate logo embroidery.",
-    colors: [
-      { name: "Light Blue", hex: "#ADD8E6", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G7K2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G7K2-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G7K2-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_850,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G7K2-ALT3"] },
-      { name: "White", hex: "#FFFFFF", images: ["https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G011", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G011-ALT1", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G011-ALT2", "https://img.guess.com/image/upload/f_auto,q_auto,fl_strip_profile,w_424,ar_2:3,c_fill/v1/EU/Style/ECOMM/W6GPZ8KF641-G011-ALT3"] }
-    ]
-  }
+  // NIKE SNEAKERS
+  { id: "n1", brand: "NIKE", title: "Air Max 95 Big Bubble 'OG'", price: 189.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "The classic silhouette updated with the Big Bubble treatment.", colors: [{ name: "Neon", hex: "#808080", images: n('d68f96e7-3ed5-4e9b-92f3-24b882dcf7ff,8e879123-27a1-4655-b4fe-e402f1a9ad91', 'NIKE+AIR+MAX+95+BIG+BUBBLE') }] },
+  { id: "n2", brand: "NIKE", title: "Air Max 95 (Blue)", price: 189.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "The classic silhouette.", colors: [{ name: "Blue", hex: "#4682B4", images: n('145b963f-0daa-4ca4-8926-f5490bcd44d0,839f4c37-89c3-4ae1-88fe-72d620015732', 'NIKE+AIR+MAX+95+BIG+BUBBLE') }] },
+  { id: "n3", brand: "NIKE", title: "Air Max Plus", price: 189.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Tuned Air technology meets striking design.", colors: [{ name: "Sunset", hex: "#FF4500", images: n('864e8ab9-fc7c-4338-8548-4405b3f9fae6,13c18a7e-e0ae-4665-ab2e-657baa05aff4', 'NIKE+AIR+MAX+PLUS') }] },
+  { id: "n4", brand: "NIKE", title: "Air Max Plus (Black)", price: 189.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Tuned Air technology meets striking design.", colors: [{ name: "Black", hex: "#000000", images: n('877d30e7-4880-46f8-aa71-6704eb7d944d,d6ad9c1a-9872-4a92-8a03-2297d2ed718c', 'AIR+MAX+PLUS') }] },
+  { id: "n5", brand: "NIKE", title: "Air Max 90", price: 149.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "The classic '90s running shoe returns.", colors: [{ name: "White/Black", hex: "#FFFFFF", images: n('51e86060-5beb-4bf3-8a79-c39dff901b71,a8e96bce-b844-4e05-9b70-cd817d1d6f58', 'NIKE+AIR+MAX+90') }] },
+  { id: "n6", brand: "NIKE", title: "Air Max 90 (Triple White)", price: 149.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "The classic '90s running shoe returns.", colors: [{ name: "Triple White", hex: "#F5F5DC", images: n('m55is6buar3k4isirw0k,culmdogjo0i7gdgx4l0x', 'AIR+MAX+90') }] },
+  { id: "n7", brand: "NIKE", title: "Air Max TL 2.5", price: 179.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "Performance running silhouette updated for the streets.", colors: [{ name: "Black/Volt", hex: "#00FF00", images: n('1c628e20-1ccc-4699-830b-be7dd14ca702,ce002430-3f82-447d-9189-5b266a3f1162', 'AIR+MAX+TL+2.5') }] },
+  { id: "n8", brand: "NIKE", title: "Air Max 90 LTR", price: 149.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Leather updates on the classic 90s silhouette.", colors: [{ name: "White LTR", hex: "#FFFFFF", images: n('7b6ccd0a-2e86-4fac-8f13-a0d11c5f90df,2444723d-eafc-43e1-9a54-3f9d3d829d51', 'AIR+MAX+90+LTR') }] },
+  { id: "n9", brand: "NIKE", title: "Air Max 90 By You", price: 169.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "Customized Air Max 90 variations.", colors: [{ name: "Custom 1", hex: "#FFB6C1", images: nby('0bd7e3c7-2680-444b-8ba3-3a6cff7b39ae,6ee73b1b-6306-4612-a154-bac88930c818', 'AIR+MAX+90+NBY') }] },
+  { id: "n10", brand: "NIKE", title: "Giannis Immortality 4", price: 89.99, currency: "EUR", isNew: true, type: "footwear", gender: "Men", description: "Channel your inner Freak.", colors: [{ name: "White/Gold", hex: "#FFD700", images: n('66fbd201-52a8-4f79-b934-239a63f53010,2ad22bbe-6325-48b0-a626-d02d827ab994', 'GIANNIS+IMMORTALITY+4') }] },
+  { id: "n11", brand: "NIKE", title: "Luka 77", price: 99.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "Designed for #77 himself.", colors: [{ name: "White/Blue", hex: "#FFFFFF", images: n('55966ea1-f940-4331-b9e9-21d8d5912089,8e906965-d415-417f-9d3f-1457709d4b4b', 'JORDAN+LUKA+77', '126ab356-44d8-4a06-89b4-fcdcc8df0245') }] },
+  { id: "n12", brand: "NIKE", title: "Air Max Plus x HOMECOMING", price: 189.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "Exclusive Pan African collaboration.", colors: [{ name: "Black/Red", hex: "#000000", images: nr('3dd77758-185b-49f8-91c7-b58e8dbf0ae2,2a8dab5e-f423-45f7-8468-6015ec869da2', 'air-max-plus-x-homecoming-pan-african-black-and-university-red-im4960-001-releasedatum') }] },
+  { id: "n13", brand: "NIKE", title: "Air Max Plus VII", price: 189.99, currency: "EUR", isNew: true, type: "footwear", gender: "Men", description: "The evolution of Tuned Air continues.", colors: [{ name: "Grey/Blue", hex: "#808080", images: n('99873a41-7923-40be-b007-d23bdb0b47bf,d4522804-2620-413d-bc46-748ec3755abc', 'NIKE+AIR+MAX+PLUS+VII') }] },
+  { id: "n14", brand: "NIKE", title: "Air Max Moto 2K", price: 129.99, currency: "EUR", isNew: true, type: "footwear", gender: "Men", description: "Y2K aesthetics meet modern Air Max comfort.", colors: [{ name: "Silver", hex: "#C0C0C0", images: n('70401754-e771-4e93-b29e-bc19344e1a7d,a6acb734-6df2-4e7b-ab8a-91b5478bf28a', 'NIKE+AIR+MAX+MOTO+2K') }] },
+  { id: "n15", brand: "NIKE", title: "Air Max Muse x Veneda", price: 159.99, currency: "EUR", isNew: true, type: "footwear", gender: "Women", description: "Exclusive collaboration drop.", colors: [{ name: "Racer Blue", hex: "#0000FF", images: nr('3c37bd39-56b7-4bb8-9b13-5620a69eaaa2,4b65c376-cf7a-4a7a-b264-f2c58224da61', 'air-max-muse-x-veneda-racer-blue') }] },
+  { id: "n16", brand: "NIKE", title: "Air Max Plus BG", price: 144.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Classic Tuned Air style.", colors: [{ name: "Grey/Blue", hex: "#808080", images: n('efa2fb35-2ace-47e0-985b-4c5a003148ad,ca45b45a-97c8-4d63-ab64-44b316b48ade', 'AIR+MAX+PLUS+BG') }] },
+  { id: "n17", brand: "NIKE", title: "Air Max 90 Premium", price: 159.99, currency: "EUR", isNew: false, type: "footwear", gender: "Women", description: "Premium materials.", colors: [{ name: "Multicolor", hex: "#E5E4E2", images: n('64fcfeb6-d406-4906-8696-181050f5ae38,24dcc475-2f58-440b-a9ac-98f84dc74133', 'WMNS+AIR+MAX+90') }] },
+  { id: "n18", brand: "NIKE", title: "Air Max Plus (Olive)", price: 189.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Tuned Air technology.", colors: [{ name: "Olive", hex: "#556B2F", images: n('5ebdcaf2-7fd5-4896-a69d-ea29479ee476,c3433089-f244-4b31-8156-6a34ea55bd3b', 'WMNS+AIR+MAX+PLUS') }] },
+  { id: "n19", brand: "NIKE", title: "Air Max Plus (Light Blue)", price: 189.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Tuned Air technology.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: n('1fbed67c-5603-4dbf-bd16-4dc38b686cc9,583f732d-0ced-47c3-b0e7-2441664f8f17', 'W+AIR+MAX+PLUS') }] },
+  { id: "n20", brand: "NIKE", title: "Air Max 90 (Triple White)", price: 149.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Classic running shoe.", colors: [{ name: "Triple White", hex: "#F5F5DC", images: n('m55is6buar3k4isirw0k,culmdogjo0i7gdgx4l0x', 'AIR+MAX+90') }] },
+  { id: "n21", brand: "NIKE", title: "Air Max 90 (Cream/Tan)", price: 149.99, currency: "EUR", isNew: false, type: "footwear", gender: "Unisex", description: "Classic running shoe.", colors: [{ name: "Cream/Tan", hex: "#D2B48C", images: n('4c04cc33-aa3d-4e82-a39e-dc6ce37974ce,d6fee385-8e66-45a0-b13f-c3a64088f78c', 'NIKE+AIR+MAX+90+PRM') }] },
+  { id: "n22", brand: "NIKE", title: "Giannis Immortality 4 (Grey)", price: 89.99, currency: "EUR", isNew: true, type: "footwear", gender: "Men", description: "Channel your inner Freak.", colors: [{ name: "Grey/Blue", hex: "#808080", images: n('625b5e77-31b9-4dbd-8286-f31e425ca5ab,b2879d67-1389-4dc2-ba24-995c1951607f', 'GIANNIS+IMMORTALITY+4') }] },
+  { id: "n23", brand: "NIKE", title: "Luka 77 (Grey/Green)", price: 99.99, currency: "EUR", isNew: true, type: "footwear", gender: "Unisex", description: "Designed for #77 himself.", colors: [{ name: "Grey/Green", hex: "#808080", images: n('7c50f920-f17f-4025-911e-a883011ecd04,7ab3642f-6c2e-40d2-9668-ee03e2a92e38', 'JORDAN+LUKA+77', '126ab356-44d8-4a06-89b4-fcdcc8df0245') }] },
+
+  // GUESS APPAREL
+  { id: "g1", brand: "GUESS", title: "Boxy Iconic T-Shirt", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Classic boxy fit.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W4YI73K8HM0-G011', '0,1') }] },
+  { id: "g2", brand: "GUESS", title: "T-Shirt kleines Logo-Dreieck", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Minimalist t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M2YI36I3Z14-JBLK', '0,1') }, { name: "White", hex: "#FFFFFF", images: g('M2YI36I3Z14-G011', '0,1') }] },
+  { id: "g3", brand: "GUESS", title: "Scuba-Poloshirt-Sweatshirt", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern scuba-fabric polo.", colors: [{ name: "Black", hex: "#000000", images: g('W6RQ05KD122-JBLK', '0,1') }] },
+  { id: "g4", brand: "GUESS", title: "Langarm-T-Shirt Waffelmuster", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Comfortable waffle-knit long sleeve.", colors: [{ name: "Black", hex: "#000000", images: g('M4BI77KCII1-JBLK', '0,1') }] },
+  { id: "g5", brand: "GUESS", title: "Besticktes T-Shirt", price: 55.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium embroidered t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M6GI13K2995-JBLK', '0,1') }] },
+  { id: "g6", brand: "GUESS", title: "T-Shirt Print", price: 27.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Statement print t-shirt.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('W5BI50KA0Q1-G9L9', '0,1') }] },
+  { id: "g7", brand: "GUESS", title: "Oversized T-Shirt Mini-Patch", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Oversized fit t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI46K8FQ4-G011', '0,1') }] },
+  { id: "g8", brand: "GUESS", title: "Triangel-Logo Stretch-T-Shirt", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Stretch t-shirt with classic triangle logo.", colors: [{ name: "Grey", hex: "#808080", images: g('W2YI45J1314-LMGY', '0,1') }] },
+  { id: "g9", brand: "GUESS", title: "Rippstrick-Tanktop", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Essential ribbed knit tank top.", colors: [{ name: "Black", hex: "#000000", images: g('W5YR10Z0130-JBLK', '0,1') }] },
+  { id: "g10", brand: "GUESS", title: "Floral-Print Crop Top", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Vibrant floral-print crop top.", colors: [{ name: "Multi Brown", hex: "#8B4513", images: g('W5GH74WH9Z2-PMIC', '0,1') }] },
+  { id: "g11", brand: "GUESS", title: "Wildleder-Minirock", price: 99.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Premium suede mini skirt.", colors: [{ name: "Green", hex: "#008000", images: g('W6PD2CWV110-G8B6', '0,1') }] },
+  { id: "g12", brand: "GUESS", title: "Strick-T-Shirt", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Textured knit t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M6RP14KD461-JBLK', '0,1') }] },
+  { id: "g13", brand: "GUESS", title: "Besticktes Logo Tanktop", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Tank top with delicate logo embroidery.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('W6GPZ8KF641-G7K2', '0,1') }] },
+  { id: "g14", brand: "GUESS", title: "Rhinestone Tanktop", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant tank top embellished with sparkling rhinestones.", colors: [{ name: "Water Green", hex: "#20B2AA", images: g('W6GP14K2940-F7YG', '0,1') }] },
+  { id: "g15", brand: "GUESS", title: "Ärmelloses Pullover-Top", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Versatile sleeveless sweater top.", colors: [{ name: "White Multi", hex: "#FDF5E6", images: g('V6GR02Z0723-A10F', '0,1') }] },
+  { id: "g16", brand: "GUESS", title: "Gestreifte Wide Leg Hose", price: 65.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Multicolor pattern striped wide-leg pants.", colors: [{ name: "Multi", hex: "#E5E4E2", images: g('W5YB73KK620-F11C', '0,1') }] },
+  { id: "g17", brand: "GUESS", title: "Sweatshirt mit gesticktem Logo", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Comfortable sweatshirt featuring classic embroidered front logo.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('V6RQ03KD761-G7HP', '0,1') }] },
+  { id: "g18", brand: "GUESS", title: "T-Shirt mit Logo-Strasssteinen", price: 40.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "T-shirt featuring sparkling rhinestones logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6RI24J1314-G011', '0,1') }] },
+  { id: "g19", brand: "GUESS", title: "Logo T-Shirt", price: 45.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Minimalist t-shirt with subtle branding.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('Z6GI07K2852-PMKU', '0,1') }] },
+  { id: "g20", brand: "GUESS", title: "Gestreifte Jeansjacke", price: 139.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Premium striped denim jacket perfect for layering.", colors: [{ name: "Beige multi", hex: "#D2B48C", images: g('M6GN70D7961-GHCK', '0,1') }] },
+  { id: "g21", brand: "GUESS", title: "T-Shirt mit aufgedrucktem Logo", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic printed logo t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('Z2YI11J1314-SCFY', '0,1') }] },
+  { id: "g22", brand: "GUESS", title: "Gestreiftes Polo", price: 69.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic striped polo shirt.", colors: [{ name: "Green", hex: "#008000", images: g('M6GP00KCOT1-SM0V', '0,1') }] },
+  { id: "g23", brand: "GUESS", title: "Sweatshirt mit Logo-Patch", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable sweatshirt with premium front logo patch.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M6RQ08KCN01-G7V2', '0,1') }] },
+  { id: "g24", brand: "GUESS", title: "Kleines Logo-T-Shirt", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Everyday essential t-shirt with small chest logo.", colors: [{ name: "Black", hex: "#000000", images: g('M6RI05KBW41-JBLK', '0,1') }] },
+  { id: "g25", brand: "GUESS", title: "Logo Tanktop", price: 55.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Fitted tank top with front logo detail.", colors: [{ name: "Blue", hex: "#0000FF", images: g('V6GP13K3055-G7JX', '0,1') }] },
+  { id: "g26", brand: "GUESS", title: "Gestreiftes T-Shirt", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Multicolor striped t-shirt.", colors: [{ name: "Multi White", hex: "#FDF5E6", images: g('W6GI18K3040-SM1L', '0,1') }] },
+  { id: "g27", brand: "GUESS", title: "T-Shirt mit Strassstein-Logo", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "T-shirt featuring sparkling rhinestones logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V3BI11J1314-G011', '0,1') }] },
+  { id: "g28", brand: "GUESS", title: "Bedrucktes Logo-T-Shirt", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic printed logo t-shirt in breathable cotton.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M6GIB4K8HM0-G046', '0,1') }] },
+  { id: "g29", brand: "GUESS", title: "Sexy straight Jeans", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Flattering straight-leg jeans in crisp white.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GA15D0705-PLYC', '0,1') }] },
+  { id: "g30", brand: "GUESS", title: "T-Shirt mit Dreieckslogo", price: 45.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "T-shirt with classic triangle logo.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('W6RI35J1314-G012', '0,1') }] },
+  { id: "g31", brand: "GUESS", title: "Kurz geschnittene Jacke", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Cropped jacket with full front zip.", colors: [{ name: "Blue", hex: "#0000FF", images: g('V6RQ17KD822-G7F3', '0,1') }] },
+  { id: "g32", brand: "GUESS", title: "Kapuzenpullover mit aufgedrucktem Logo", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable hooded sweatshirt with printed logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M6RQ26KCPR1-G046', '0,1') }] },
+  { id: "g33", brand: "GUESS", title: "Cargo Shorts", price: 80.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Utilitarian cargo shorts perfect for exploring the city.", colors: [{ name: "Black", hex: "#000000", images: g('Z6GD01K2836-JBLK', '0,1') }] },
+  { id: "g34", brand: "GUESS", title: "T-Shirt mit Frontlogo", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Simple everyday t-shirt with subtle front logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V6RI04K8FQ4-G011', '0,1') }] },
+  { id: "g35", brand: "GUESS", title: "Oversized American Tradition T-Shirt", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Vintage inspired graphic t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('W4YI08K8HM0-JBLK', '0,1') }] },
+  { id: "g36", brand: "GUESS", title: "Owen relaxed Jeans", price: 120.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Comfortable relaxed fit jeans.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GAT5D1113-ES12', '0,1') }] },
+  { id: "g37", brand: "GUESS", title: "Oversized Iconic Sweatshirt", price: 69.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium oversized sweatshirt with bold iconic branding.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YQ21K9V31-G011', '0,1') }] },
+  { id: "g38", brand: "GUESS", title: "Slim American Tradition Langarm-T-Shirt", price: 39.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic slim long-sleeve t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI54K8HM0-G011', '0,1') }] },
+  { id: "g39", brand: "GUESS", title: "Ärmelloses Smocked-Top", price: 60.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Chic sleeveless smocked top.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GP40K3256-G1O6', '0,1') }] },
+  { id: "g40", brand: "GUESS", title: "Spitzen-Dreieck-Logo T-Shirt", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant t-shirt with lace triangle logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GI52K5423-G011', '0,1') }] },
+  { id: "g41", brand: "GUESS", title: "Pack mit 3 Boxershorts", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Multi", hex: "#E5E4E2", images: g('U97G01KCD31-F017', '0,1') }] },
+  { id: "g42", brand: "GUESS", title: "Schmal geschnittene Chinohosen", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic slim-fit chinos for any occasion.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('M5BB75WHHO2-A90N', '0,1') }] },
+  { id: "g43", brand: "GUESS", title: "Cardigan mit Reißverschluss vorn", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern cardigan with front zip closure.", colors: [{ name: "Black", hex: "#000000", images: g('W4BR88Z3BH0-JBLK', '0,1') }] },
+  { id: "g44", brand: "GUESS", title: "Overshirt aus Baumwollmischung", price: 120.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Versatile cotton-blend overshirt for layering.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GH64W1914-G018', '0,1') }] },
+  { id: "g45", brand: "GUESS", title: "Polo-Pullover", price: 90.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Refined knitted polo sweater.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M6GR05Z0558-G7V2', '0,1') }] },
+  { id: "g46", brand: "GUESS", title: "Reguläre Passform Badehosen", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic swim trunks for summer.", colors: [{ name: "Black", hex: "#000000", images: g('F6GT24WG282-JBLK', '0,1') }] },
+  { id: "g47", brand: "GUESS", title: "Jersey T-Shirt", price: 60.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jersey t-shirt with embroidered detail.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GP29K3188-G047', '0,1') }] },
+  { id: "g48", brand: "GUESS", title: "Slim-Fit-Hemd", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Elegant slim fit shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M1YH20W7ZK1-G011', '0,1') }] },
+  { id: "g49", brand: "GUESS", title: "Übergroßes Popeline-Hemd", price: 90.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Crisp oversized poplin shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GH54W1979-G011', '0,1') }] },
+  { id: "g50", brand: "GUESS", title: "Socken Logodreieck", price: 12.00, currency: "EUR", isNew: false, type: "accessory", gender: "Unisex", description: "Premium comfortable socks.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V2GZ00ZZ00I-G011', '0') }] },
+  { id: "g51", brand: "GUESS", title: "Marciano Leinenmischung Weste", price: 180.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant Marciano vest in a premium linen blend.", colors: [{ name: "Brown", hex: "#A52A2A", images: g('G6GH26W2218-F12W', '0,1') }] },
+  { id: "g52", brand: "GUESS", title: "Häkelhemd", price: 55.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Trendy crochet shirt, perfect for summer days.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M3YH58WFIM0-F0F8', '0,1') }] },
+  { id: "g53", brand: "GUESS", title: "4G Logo Bikini-Höschen", price: 65.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Classic 4G logo bikini bottom.", colors: [{ name: "Multi Brown", hex: "#8B4513", images: g('E6GO15KCUO2-G1FA', '0,1') }] },
+  { id: "g54", brand: "GUESS", title: "Jewel string Bikini-Höschen", price: 65.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Jewel string bikini bottom.", colors: [{ name: "Black", hex: "#000000", images: g('E6GO10KF590-JBLK', '0,1') }] },
+  { id: "g55", brand: "GUESS", title: "Boxy T-Shirt mit Logo", price: 45.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Boxy t-shirt with classic logo.", colors: [{ name: "Multi Black", hex: "#1C1C1C", images: g('V4YI06I3Z14-FJ8N', '0,1') }] },
+  { id: "g56", brand: "GUESS", title: "1981 Skinny Jeans", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Classic skinny jeans in light blue.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('W2YA46D4Q01-CLH1', '0,1') }] },
+  { id: "g57", brand: "GUESS", title: "Denim-Crop-Top", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Trendy denim crop top.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('W6GHAGD1705-KBLE', '0,1') }] },
+  { id: "g58", brand: "GUESS", title: "Slim Fit Stricktop", price: 60.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Slim fit knit top.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('W6GP09K2931-A11C', '0,1') }] },
+  { id: "g59", brand: "GUESS", title: "Sweatshirt mit Logoband", price: 110.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Sweatshirt with stylish logo band.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('W6GQ03K2656-G7V2', '0,1') }] },
+  { id: "g60", brand: "GUESS", title: "Seamless Leggings mit seitlichem Band", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Comfortable seamless leggings.", colors: [{ name: "Black", hex: "#000000", images: g('V6GB07K2998-JBLK', '0,1') }] },
+  { id: "g61", brand: "GUESS", title: "Angels Chino Hosen", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic chino pants.", colors: [{ name: "Braun", hex: "#8B4513", images: g('M6RB16WK38A-G1DY', '0,1') }] },
+  { id: "g62", brand: "GUESS", title: "Marciano geflochtenes Viskose-Top", price: 120.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Premium Marciano viscose top.", colors: [{ name: "Braun", hex: "#8B4513", images: g('G6GR21Z0758-G1EV', '0,1') }] },
+  { id: "g63", brand: "GUESS", title: "Bedruckte Hemdjacke", price: 49.50, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Printed versatile overshirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M5BH39WFKE2-P7US', '0,1') }] },
+  { id: "g64", brand: "GUESS", title: "Relaxed Jeans mit Print", price: 90.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Printed relaxed fit jeans.", colors: [{ name: "Blau", hex: "#0000FF", images: g('M5YA82D0212-D0GR', '0,1') }] },
+  { id: "g65", brand: "GUESS", title: "Regular-Fit T-Shirt", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Essential regular fit t-shirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('Z6RI17I3Z14-G7R1', '0,1') }] },
+  { id: "g66", brand: "GUESS", title: "Jacquard Logo T-Shirt", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jacquard logo t-shirt.", colors: [{ name: "Multi Beige", hex: "#F5F5DC", images: g('M6GP34K3200-FMAZ', '0,1') }] },
+  { id: "g67", brand: "GUESS", title: "Mid Waist Baggy Jeans", price: 350.00, currency: "EUR", isNew: false, type: "clothing", gender: "Unisex", description: "Premium baggy denim.", colors: [{ name: "Blau", hex: "#0000FF", images: g('W5GA1HD4S1C-GUBT', '0,1') }] },
+  { id: "g68", brand: "GUESS", title: "Satin-Top", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant satin top.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('W6RH55WJ732-F12S', '0,1') }] },
+  { id: "g69", brand: "GUESS", title: "Rippstrick-Top", price: 40.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Comfortable ribbed knit top.", colors: [{ name: "Hellgrün", hex: "#90EE90", images: g('W6RP39KD092-A70M', '0,1') }] },
+  { id: "g70", brand: "GUESS", title: "T-Shirt Logostickerei", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium logo embroidery.", colors: [{ name: "Weiss", hex: "#FFFFFF", images: g('M4YI44K8FQ4-G011', '0,1') }] },
+  { id: "g71", brand: "GUESS", title: "Spitzenpullover", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant lace detailed pullover.", colors: [{ name: "Schwarz", hex: "#000000", images: g('W6GZ01Z0606-JBLK', '0,1') }] },
+  
+  // SPECIFIC UNPACKED COLORS (To ensure 180+ unique cards visually)
+  { id: "g106", brand: "GUESS", title: "Boxy Iconic T-Shirt (Weiß)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Classic boxy fit iconic t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W4YI73K8HM0-G011', '0,1') }] },
+  { id: "g107", brand: "GUESS", title: "T-Shirt kleines Logo-Dreieck (Hellbraun)", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Minimalist t-shirt with small triangle logo detail.", colors: [{ name: "Light Brown", hex: "#D2B48C", images: g('M4YI0AKCCM1-G1CA', '0,1') }] },
+  { id: "g108", brand: "GUESS", title: "T-Shirt kleines Logo-Dreieck (Weiß)", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Minimalist t-shirt with small triangle logo detail.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI0AKCCM1-G011', '0,1') }] },
+  { id: "g109", brand: "GUESS", title: "Scuba-Poloshirt-Sweatshirt (Schwarz)", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern scuba-fabric polo sweatshirt.", colors: [{ name: "Black", hex: "#000000", images: g('W6RQ05KD122-JBLK', '0,1') }] },
+  { id: "g110", brand: "GUESS", title: "Langarm-T-Shirt Waffelmuster (Schwarz)", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Comfortable waffle-knit long sleeve t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M4BI77KCII1-JBLK', '0,1') }] },
+  { id: "g111", brand: "GUESS", title: "Langarm-T-Shirt Waffelmuster (Creme)", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Comfortable waffle-knit long sleeve t-shirt.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M4BI77KCII1-G053', '0,1') }] },
+  { id: "g112", brand: "GUESS", title: "Besticktes T-Shirt (Schwarz)", price: 55.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium embroidered t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M6GI13K2995-JBLK', '0,1') }] },
+  { id: "g113", brand: "GUESS", title: "Besticktes T-Shirt (Weiß)", price: 55.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium embroidered t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M6GI13K2995-G011', '0,1') }] },
+  { id: "g114", brand: "GUESS", title: "T-Shirt Print (Creme)", price: 27.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Statement print t-shirt.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('W5BI50KA0Q1-G9L9', '0,1') }] },
+  { id: "g115", brand: "GUESS", title: "Oversized T-Shirt Mini-Patch (Weiß)", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Oversized fit t-shirt with mini patch.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI46K8FQ4-G011', '0,1') }] },
+  { id: "g116", brand: "GUESS", title: "Kurz geschnittene Jacke (Blau)", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Cropped jacket with full front zip.", colors: [{ name: "Blue", hex: "#0000FF", images: g('V6RQ17KD822-G7F3', '0,1') }] },
+  { id: "g117", brand: "GUESS", title: "Kurz geschnittene Jacke (Beige)", price: 99.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Cropped jacket with full front zip.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('V6RQ17KD822-G1O3', '0,1') }] },
+  { id: "g118", brand: "GUESS", title: "Kapuzenpullover mit Logo (Weiß)", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable hooded sweatshirt with printed logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M6RQ26KCPR1-G046', '0,1') }] },
+  { id: "g119", brand: "GUESS", title: "Kapuzenpullover mit Logo (Blau)", price: 79.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable hooded sweatshirt with printed logo.", colors: [{ name: "Blue", hex: "#0000FF", images: g('M6RQ26KCPR1-BLN', '0,1') }] },
+  { id: "g120", brand: "GUESS", title: "Cargo Shorts (Schwarz)", price: 80.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Utilitarian cargo shorts.", colors: [{ name: "Black", hex: "#000000", images: g('Z6GD01K2836-JBLK', '0,1') }] },
+  { id: "g121", brand: "GUESS", title: "Cargo Shorts (Beige)", price: 80.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Utilitarian cargo shorts.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('Z6GD01K2836-G9I0', '0,1') }] },
+  { id: "g122", brand: "GUESS", title: "T-Shirt mit Frontlogo (Weiß)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Simple everyday t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V6RI04K8FQ4-G011', '0,1') }] },
+  { id: "g123", brand: "GUESS", title: "T-Shirt mit Frontlogo (Blau)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Simple everyday t-shirt.", colors: [{ name: "Blue", hex: "#0000FF", images: g('V6RI04K8FQ4-G7F3', '0,1') }] },
+  { id: "g124", brand: "GUESS", title: "T-Shirt 4G-Logoprint (Grey)", price: 22.50, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Premium t-shirt featuring 4G logo.", colors: [{ name: "Grey", hex: "#808080", images: g('M5BI72I3Z14-G969', '0,1') }] },
+  { id: "g125", brand: "GUESS", title: "Owen relaxed Jeans (Creme)", price: 120.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Comfortable relaxed fit jeans.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GAT5D1113-ES12', '0,1') }] },
+  { id: "g126", brand: "GUESS", title: "Oversized Iconic Sweatshirt (Weiß)", price: 69.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium oversized sweatshirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YQ21K9V31-G011', '0,1') }] },
+  { id: "g127", brand: "GUESS", title: "Oversized Iconic Sweatshirt (Schwarz)", price: 69.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium oversized sweatshirt.", colors: [{ name: "Black", hex: "#000000", images: g('M4YQ21K9V31-JBLK', '0,1') }] },
+  { id: "g128", brand: "GUESS", title: "Oversized Iconic Sweatshirt (Dunkelblau)", price: 69.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium oversized sweatshirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M4YQ21K9V31-A71W', '0,1') }] },
+  { id: "g129", brand: "GUESS", title: "Oversized Iconic Sweatshirt (Grau)", price: 69.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium oversized sweatshirt.", colors: [{ name: "Grey", hex: "#808080", images: g('M4YQ21K9V31-H90Z', '0,1') }] },
+  { id: "g130", brand: "GUESS", title: "Slim American Tradition T-Shirt (Weiß)", price: 39.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic slim long-sleeve t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI54K8HM0-G011', '0,1') }] },
+  { id: "g131", brand: "GUESS", title: "Slim American Tradition T-Shirt (Schwarz)", price: 39.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic slim long-sleeve t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M4YI54K8HM0-JBLK', '0,1') }] },
+  { id: "g132", brand: "GUESS", title: "Slim American Tradition T-Shirt (Dunkelblau)", price: 39.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic slim long-sleeve t-shirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M4YI54K8HM0-A71W', '0,1') }] },
+  { id: "g133", brand: "GUESS", title: "Ärmelloses Smocked-Top (Weiß)", price: 60.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Chic sleeveless smocked top.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GP40K3256-G1O6', '0,1') }] },
+  { id: "g134", brand: "GUESS", title: "Spitzen-Dreieck-Logo T-Shirt (Weiß)", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant t-shirt with lace triangle logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GI52K5423-G011', '0,1') }] },
+  { id: "g135", brand: "GUESS", title: "Spitzen-Dreieck-Logo T-Shirt (Hellblau)", price: 45.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant t-shirt with lace triangle logo.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('W6GI52K5423-A719', '0,1') }] },
+  { id: "g136", brand: "GUESS", title: "Rhinestone Tanktop (Olivgrün)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Tank top embellished with sparkling rhinestones.", colors: [{ name: "Olive Green", hex: "#556B2F", images: g('W6GP14K2940-F84O', '0,1') }] },
+  { id: "g137", brand: "GUESS", title: "Rhinestone Tanktop (Beige)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Tank top embellished with sparkling rhinestones.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('W6GP14K2940-F1CY', '0,1') }] },
+  { id: "g138", brand: "GUESS", title: "Rhinestone Tanktop (Wassergrün)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Tank top embellished with sparkling rhinestones.", colors: [{ name: "Water Green", hex: "#20B2AA", images: g('W6GP14K2940-F7YG', '0,1') }] },
+  { id: "g139", brand: "GUESS", title: "Pack mit 3 Boxershorts (Multicolor)", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Multi", hex: "#E5E4E2", images: g('U97G01KCD31-F017', '0,1') }] },
+  { id: "g140", brand: "GUESS", title: "Pack mit 3 Boxershorts (Multi Blue)", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Multi Blue", hex: "#4682B4", images: g('U97G01KCD31-HE90', '0,1') }] },
+  { id: "g141", brand: "GUESS", title: "Pack mit 3 Boxershorts (Multi Black)", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Multi Black", hex: "#1C1C1C", images: g('U97G01KCD31-FQ90', '0,1') }] },
+  { id: "g142", brand: "GUESS", title: "Pack mit 3 Boxershorts (Black)", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Black", hex: "#000000", images: g('U97G01KCD31-A996', '0,1') }] },
+  { id: "g143", brand: "GUESS", title: "Pack mit 3 Boxershorts (Multi White)", price: 40.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Comfortable pack of 3 everyday boxers.", colors: [{ name: "Multi White", hex: "#FDF5E6", images: g('U97G01KCD31-F54Q', '0') }] },
+  { id: "g144", brand: "GUESS", title: "Cardigan mit Reißverschluss vorn (Schwarz)", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern cardigan with front zip closure.", colors: [{ name: "Black", hex: "#000000", images: g('W4BR88Z3BH0-JBLK', '0,1') }] },
+  { id: "g145", brand: "GUESS", title: "Cardigan mit Reißverschluss vorn (Weiß)", price: 80.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern cardigan with front zip closure.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W4BR88Z3BH0-G1O6', '0,1') }] },
+  { id: "g146", brand: "GUESS", title: "Overshirt aus Baumwollmischung (Creme)", price: 120.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Versatile cotton-blend overshirt for layering.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GH64W1914-G018', '0,1') }] },
+  { id: "g147", brand: "GUESS", title: "Polo-Pullover (Dunkelblau)", price: 90.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Refined knitted polo sweater.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M6GR05Z0558-G7V2', '0,1') }] },
+  { id: "g148", brand: "GUESS", title: "Polo-Pullover (Beige)", price: 90.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Refined knitted polo sweater.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('M6GR05Z0558-G1FG', '0,1') }] },
+  { id: "g149", brand: "GUESS", title: "Reguläre Passform Badehosen (Schwarz)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic swim trunks for summer.", colors: [{ name: "Black", hex: "#000000", images: g('F6GT24WG282-JBLK', '0,1') }] },
+  { id: "g150", brand: "GUESS", title: "Reguläre Passform Badehosen (Königsblau)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic swim trunks for summer.", colors: [{ name: "Royal Blue", hex: "#4169E1", images: g('F6GT24WG282-G7M1', '0,1') }] },
+  { id: "g151", brand: "GUESS", title: "Reguläre Passform Badehosen (Weiß)", price: 50.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Classic swim trunks for summer.", colors: [{ name: "White", hex: "#FFFFFF", images: g('F6GT24WG282-G011', '0,1') }] },
+  { id: "g152", brand: "GUESS", title: "Jersey T-Shirt (Creme)", price: 60.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jersey t-shirt with embroidered detail.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M6GP29K3188-G047', '0,1') }] },
+  { id: "g153", brand: "GUESS", title: "Jersey T-Shirt (Schwarz)", price: 60.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jersey t-shirt with embroidered detail.", colors: [{ name: "Black", hex: "#000000", images: g('M6GP29K3188-JBLK', '0,1') }] },
+  { id: "g154", brand: "GUESS", title: "Slim-Fit-Hemd (Weiß)", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Elegant slim fit shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M1YH20W7ZK1-G011', '0,1') }] },
+  { id: "g155", brand: "GUESS", title: "Slim-Fit-Hemd (Schwarz)", price: 70.00, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Elegant slim fit shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M1YH20W7ZK1-JBLK', '0,1') }] },
+  { id: "g156", brand: "GUESS", title: "Übergroßes Popeline-Hemd (Weiß)", price: 90.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Crisp oversized poplin shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GH54W1979-G011', '0,1') }] },
+  { id: "g157", brand: "GUESS", title: "Socken Logodreieck (Weiß)", price: 12.00, currency: "EUR", isNew: false, type: "accessory", gender: "Unisex", description: "Premium comfortable socks.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V2GZ00ZZ00I-G011', '0') }] },
+  { id: "g158", brand: "GUESS", title: "T-Shirt 4G-Logoprint (Black)", price: 22.50, currency: "EUR", isNew: false, type: "clothing", gender: "Men", description: "Premium t-shirt featuring the classic 4G logo.", colors: [{ name: "Black", hex: "#000000", images: g('M2YI36I3Z14-JBLK', '0,1') }] }, 
+  { id: "g159", brand: "GUESS", title: "American Tradition T-Shirt (Dunkelblau)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic everyday graphic t-shirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('M4YI42K8FQ4-A71W', '0,1') }] },
+  { id: "g160", brand: "GUESS", title: "American Tradition T-Shirt (Creme)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic everyday graphic t-shirt.", colors: [{ name: "Cream", hex: "#FFFDD0", images: g('M4YI42K8FQ4-G1W7', '0,1') }] },
+  { id: "g161", brand: "GUESS", title: "American Tradition T-Shirt (Grau)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic everyday graphic t-shirt.", colors: [{ name: "Grey", hex: "#808080", images: g('M4YI42K8FQ4-H90Z', '0,1') }] },
+  { id: "g162", brand: "GUESS", title: "American Tradition T-Shirt (Schwarz)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic everyday graphic t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('M4YI42K8FQ4-JBLK', '0,1') }] },
+  { id: "g163", brand: "GUESS", title: "American Tradition T-Shirt (Weiß)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Classic everyday graphic t-shirt.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI42K8FQ4-G011', '0,1') }] },
+  { id: "g164", brand: "GUESS", title: "T-Shirt Logostickerei (Weiß)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium logo embroidery.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M4YI44K8FQ4-G011', '0,1') }] },
+  { id: "g165", brand: "GUESS", title: "T-Shirt Logostickerei (Schwarz)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium logo embroidery.", colors: [{ name: "Black", hex: "#000000", images: g('M4YI44K8FQ4-JBLK', '0,1') }] },
+  { id: "g166", brand: "GUESS", title: "T-Shirt Logostickerei (Olivgrün)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium logo embroidery.", colors: [{ name: "Olive Green", hex: "#556B2F", images: g('M4YI44K8FQ4-G8EV', '0,1') }] },
+  { id: "g167", brand: "GUESS", title: "Boxy Logo T-Shirt (Dunkelblau)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern boxy fit with statement logo.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('V6GI20K3509-A71W', '0,1') }] },
+  { id: "g168", brand: "GUESS", title: "Boxy Logo T-Shirt (Weiß)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Modern boxy fit with statement logo.", colors: [{ name: "White", hex: "#FFFFFF", images: g('V6GI20K3509-G011', '0,1') }] },
+  { id: "g169", brand: "GUESS", title: "Stretch-T-Shirt mit Triangel-Logo (Schwarz)", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Iconic triangle logo on stretch fabric.", colors: [{ name: "Black", hex: "#000000", images: g('W2YI44J1314-JBLK', '0,1') }] },
+  { id: "g170", brand: "GUESS", title: "Stretch-T-Shirt mit Triangel-Logo (Rose)", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Iconic triangle logo on stretch fabric.", colors: [{ name: "Rose", hex: "#FFC0CB", images: g('W2YI44J1314-A627', '0,1') }] },
+  { id: "g171", brand: "GUESS", title: "Stretch-T-Shirt mit Triangel-Logo (Himmelblau)", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Iconic triangle logo on stretch fabric.", colors: [{ name: "Light Blue", hex: "#ADD8E6", images: g('W2YI44J1314-A72C', '0,1') }] },
+  { id: "g172", brand: "GUESS", title: "Stretch-T-Shirt mit Triangel-Logo (Grau)", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Iconic triangle logo on stretch fabric.", colors: [{ name: "Grey", hex: "#808080", images: g('W2YI44J1314-LMGY', '0,1') }] },
+  { id: "g173", brand: "GUESS", title: "Stretch-T-Shirt mit Triangel-Logo (Weiß)", price: 30.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Iconic triangle logo on stretch fabric.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W2YI44J1314-G011', '0,1') }] },
+  { id: "g174", brand: "GUESS", title: "Spitzenpullover (Schwarz)", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant lace detailed pullover.", colors: [{ name: "Black", hex: "#000000", images: g('W6GZ01Z0606-JBLK', '0,1') }] },
+  { id: "g175", brand: "GUESS", title: "Spitzenpullover (Weiß)", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Elegant lace detailed pullover.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W6GZ01Z0606-G011', '0,1') }] },
+  { id: "g176", brand: "GUESS", title: "Satin-Top (Beige)", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant satin top.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('W6RH55WJ732-F12S', '0,1') }] },
+  { id: "g177", brand: "GUESS", title: "Satin-Top (Schwarz)", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant satin top.", colors: [{ name: "Black", hex: "#000000", images: g('W6RH55WJ732-JBLK', '0,1') }] },
+  { id: "g178", brand: "GUESS", title: "Jacquard Logo T-Shirt (Beige)", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jacquard logo t-shirt.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('M6GP34K3200-FMAZ', '0,1') }] },
+  { id: "g179", brand: "GUESS", title: "Jacquard Logo T-Shirt (Blue)", price: 70.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Premium jacquard logo t-shirt.", colors: [{ name: "Blue", hex: "#4682B4", images: g('M6GP34K3200-FBDB', '0,1') }] },
+  { id: "g180", brand: "GUESS", title: "Regular-Fit T-Shirt (Dunkelblau)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Essential regular fit t-shirt.", colors: [{ name: "Dark Blue", hex: "#00008B", images: g('Z6RI17I3Z14-G7R1', '0,1') }] },
+  { id: "g181", brand: "GUESS", title: "Regular-Fit T-Shirt (Schwarz)", price: 35.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Essential regular fit t-shirt.", colors: [{ name: "Black", hex: "#000000", images: g('Z6RI16I3Z14-JBLK', '0,1') }] },
+  { id: "g182", brand: "GUESS", title: "Wide Leg Hose (Schwarz)", price: 44.50, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant wide-leg pants.", colors: [{ name: "Black", hex: "#000000", images: g('W4BB44WGCV2-JBLK', '0,1') }] },
+  { id: "g183", brand: "GUESS", title: "Wide Leg Hose (Beige)", price: 44.50, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Elegant wide-leg pants.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('W4BB44WGCV2-A117', '0,1') }] },
+  { id: "g184", brand: "GUESS", title: "Hoodie GJ x BVB (Schwarz)", price: 99.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Exclusive collaboration hoodie.", colors: [{ name: "Black", hex: "#000000", images: g('M6RQ26KCPR1-JBLK', '0,1') }] },
+  { id: "g185", brand: "GUESS", title: "Besticktes Logo T-Shirt (Schwarz)", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Subtle embroidered details.", colors: [{ name: "Black", hex: "#000000", images: g('M6GIB7K8HM0-JBLK', '0,1') }] },
+  { id: "g186", brand: "GUESS", title: "Besticktes Logo T-Shirt (Weiß)", price: 29.00, currency: "EUR", isNew: true, type: "clothing", gender: "Men", description: "Subtle embroidered details.", colors: [{ name: "White", hex: "#FFFFFF", images: g('M6GIB7K8HM0-G046', '0,1') }] },
+  { id: "g187", brand: "GUESS", title: "Boxy Logo-T-Shirt (Hellrose)", price: 24.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Everyday boxy fit logo tee.", colors: [{ name: "Light Pink", hex: "#FFB6C1", images: g('W5YI06KCYV2-G6I1', '0,1') }] },
+  { id: "g188", brand: "GUESS", title: "Boxy Logo-T-Shirt (Dunkelbraun)", price: 24.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Everyday boxy fit logo tee.", colors: [{ name: "Brown", hex: "#654321", images: g('W5YI06KCYV2-G1EB', '0,1') }] },
+  { id: "g189", brand: "GUESS", title: "Boxy Logo-T-Shirt (Grün)", price: 24.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Everyday boxy fit logo tee.", colors: [{ name: "Green", hex: "#008000", images: g('W5YI06KCYV2-G8CW', '0,1') }] },
+  { id: "g190", brand: "GUESS", title: "Boxy Logo-T-Shirt (Schwarz)", price: 24.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Everyday boxy fit logo tee.", colors: [{ name: "Black", hex: "#000000", images: g('W5YI06KCYV2-JBLK', '0,1') }] },
+  { id: "g191", brand: "GUESS", title: "Boxy Logo-T-Shirt (Weiß)", price: 24.00, currency: "EUR", isNew: true, type: "clothing", gender: "Women", description: "Everyday boxy fit logo tee.", colors: [{ name: "White", hex: "#FFFFFF", images: g('W5YI06KCYV2-G011', '0,1') }] },
+  { id: "g192", brand: "GUESS", title: "Logo-T-Shirt mit Strasssteinen", price: 35.00, currency: "EUR", isNew: false, type: "clothing", gender: "Women", description: "Soft cotton t-shirt with rhinestone details.", colors: [{ name: "Beige", hex: "#F5F5DC", images: g('W6RI24J1314-G9L9', '0,1') }] }
 ];
 
 const HOMEPAGE_COLLECTIONS = [
   {
-    title: "GUESS NEW ARRIVALS",
+    title: "NEW ARRIVALS",
     banner: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600&q=80", 
     products: MOCK_PRODUCTS.filter(p => p.isNew).slice(0, 4) 
   },
   {
-    title: "GUESS ESSENTIALS",
+    title: "ESSENTIALS",
     banner: "https://images.unsplash.com/photo-1552346154-21d32810baa3?w=1600&q=80", 
     products: MOCK_PRODUCTS.filter(p => !p.isNew).slice(0, 4) 
   }
 ];
 
+// --- FUZZY SEARCH ENGINE ---
+// Smart search: exact matches first, then word subsets, then letter sequence
+const isFuzzySequence = (query, text) => {
+  let i = 0, j = 0;
+  while (i < query.length && j < text.length) {
+    if (query[i] === text[j]) i++;
+    j++;
+  }
+  return i === query.length;
+};
+
+const getSearchResults = (query) => {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase().trim();
+  const qClean = q.replace(/\s+/g, '');
+  
+  return MOCK_PRODUCTS.map(product => {
+    const searchableText = `${product.brand} ${product.title} ${product.type}`.toLowerCase();
+    
+    let score = 0;
+    if (searchableText.includes(q)) {
+      score = 100; // Exact substring
+    } else {
+      const words = q.split(' ');
+      if (words.every(w => searchableText.includes(w))) {
+        score = 80; // All words present somewhere
+      } else if (isFuzzySequence(qClean, searchableText)) {
+        score = 50; // Letters appear in order (e.g., 'shrt' -> 'shirt')
+      }
+    }
+    return { ...product, score };
+  })
+  .filter(p => p.score > 0)
+  .sort((a, b) => b.score - a.score);
+};
+
 // --- UI COMPONENTS ---
+
+const SearchOverlay = ({ isOpen, onClose, onProductClick }) => {
+  const [query, setQuery] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+      document.body.style.overflow = 'hidden';
+    } else {
+      setQuery('');
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const results = getSearchResults(query);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-white/95 backdrop-blur-xl animate-in fade-in duration-500 flex flex-col">
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-8 pt-8 md:pt-16 pb-6 flex items-center relative">
+        <input 
+          ref={inputRef}
+          type="text" 
+          placeholder="SEARCH AUREN..." 
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Escape' && onClose()}
+          className="w-full text-4xl md:text-7xl font-bold uppercase tracking-tighter bg-transparent border-none outline-none text-black placeholder:text-gray-200 focus:ring-0 pl-0"
+        />
+        <button onClick={onClose} className="absolute right-4 sm:right-8 p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+          <XIcon />
+        </button>
+      </div>
+
+      <div className="w-full h-px bg-gray-200 mb-8" />
+
+      <div className="flex-1 overflow-y-auto max-w-[1400px] w-full mx-auto px-4 sm:px-8 pb-32">
+        {!query ? (
+          <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-50">
+            <SearchIcon active={false} className="w-16 h-16 mb-6" />
+            <p className="font-mono text-sm uppercase tracking-widest text-center">Start typing to explore</p>
+          </div>
+        ) : results.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in slide-in-from-bottom-8 duration-500">
+            {results.map((product) => (
+              <GridProductCard 
+                key={product.id} 
+                product={product} 
+                onProductClick={(p) => {
+                  onClose();
+                  onProductClick(p);
+                }} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <p className="font-mono text-sm uppercase tracking-widest text-center">No matches found for "{query}"</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const GridProductCard = ({ product, onProductClick }) => {
   const defaultImage = product.colors?.[0]?.images?.[0];
   const hasMultipleColors = product.colors && product.colors.length > 1;
+  const isFootwear = product.type === 'footwear';
 
   return (
     <div className="flex flex-col gap-3 cursor-pointer group" onClick={() => onProductClick(product)}>
@@ -221,10 +409,18 @@ const GridProductCard = ({ product, onProductClick }) => {
           </span>
           
           {hasMultipleColors && (
-            <div className="flex gap-1">
-              {product.colors.slice(0, 3).map((c, idx) => (
-                <div key={idx} className="w-2.5 h-2.5 rounded-full border border-black/10" style={{backgroundColor: c.hex}}></div>
-              ))}
+            <div className="flex gap-1.5 items-center">
+              {isFootwear ? (
+                product.colors.slice(0, 3).map((c, idx) => (
+                  <div key={idx} className="w-4 h-4 rounded-sm border border-black/10 overflow-hidden bg-white" title={c.name}>
+                    <img src={c.images[0]} className="w-full h-full object-cover" alt={c.name} />
+                  </div>
+                ))
+              ) : (
+                product.colors.slice(0, 3).map((c, idx) => (
+                  <div key={idx} className="w-2.5 h-2.5 rounded-full border border-black/10" style={{backgroundColor: c.hex}} title={c.name}></div>
+                ))
+              )}
               {product.colors.length > 3 && <span className="text-[10px] text-gray-400 ml-0.5">+{product.colors.length - 3}</span>}
             </div>
           )}
@@ -331,13 +527,18 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
 
         <div className="w-full md:w-1/2 flex flex-col bg-white border-r border-gray-100 flex-shrink-0">
           <div className="relative w-full h-[40vh] md:h-auto md:flex-1 bg-gray-50 flex-shrink-0 overflow-hidden">
-            {activeImageUrl && (
+            {activeImageUrl ? (
               <img 
                 key={activeImageUrl}
                 src={activeImageUrl} 
                 alt={product.title} 
                 className="w-full h-full object-cover animate-in fade-in duration-500 ease-out" 
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1511130558090-00af810c2111?w=800&q=80'; }}
               />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 font-mono text-sm uppercase tracking-widest">
+                Image Not Available
+              </div>
             )}
           </div>
           
@@ -349,7 +550,7 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
                   onClick={() => setActiveImageIndex(idx)}
                   className={`flex-shrink-0 w-16 md:w-20 aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all duration-300 ${activeImageIndex === idx ? 'border-black opacity-100' : 'border-transparent opacity-50 hover:opacity-100'}`}
                 >
-                  <img src={img} className="w-full h-full object-cover" alt={`Thumbnail ${idx}`} />
+                  <img src={img} className="w-full h-full object-cover" alt={`Thumbnail ${idx}`} onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1511130558090-00af810c2111?w=800&q=80'; }} />
                 </button>
               ))}
             </div>
@@ -365,23 +566,40 @@ const ProductModal = ({ product, onClose, onAddToCart }) => {
             {product.description}
           </p>
 
+          {/* COLOR SELECTION */}
           {product.colors && product.colors.length > 0 && (
             <div className="mb-8">
               <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-3">
                 COLOR: <span className="text-black">{activeColor?.name}</span>
               </p>
-              <div className="flex gap-3 flex-wrap">
-                {product.colors.map((col, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => { setActiveColorIndex(idx); setActiveImageIndex(0); }}
-                    className={`w-10 h-10 rounded-full border-2 p-0.5 transition-all duration-300 ${activeColorIndex === idx ? 'border-black scale-110' : 'border-transparent hover:border-gray-300'}`}
-                    title={col.name}
-                  >
-                    <div className="w-full h-full rounded-full shadow-sm border border-black/10" style={{ backgroundColor: col.hex }}></div>
-                  </button>
-                ))}
-              </div>
+              
+              {isFootwear ? (
+                <div className="flex gap-3 flex-wrap">
+                  {product.colors.map((col, idx) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => { setActiveColorIndex(idx); setActiveImageIndex(0); }}
+                      className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-white ${activeColorIndex === idx ? 'border-black scale-105 shadow-md' : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100'}`}
+                      title={col.name}
+                    >
+                      <img src={col.images[0]} alt={col.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-3 flex-wrap">
+                  {product.colors.map((col, idx) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => { setActiveColorIndex(idx); setActiveImageIndex(0); }}
+                      className={`w-10 h-10 rounded-full border-2 p-0.5 transition-all duration-300 ${activeColorIndex === idx ? 'border-black scale-110' : 'border-transparent hover:border-gray-300'}`}
+                      title={col.name}
+                    >
+                      <div className="w-full h-full rounded-full shadow-sm border border-black/10" style={{ backgroundColor: col.hex }}></div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -488,7 +706,7 @@ const CatalogPage = ({ onProductClick, activeBrand, setActiveBrand }) => {
           )}
         </div>
         
-        {/* Фильтры: Пол и Категории */}
+        {/* Фильтры */}
         <div className="flex flex-col gap-4 mb-10">
           <div className="flex overflow-x-auto gap-4 pb-2 hide-scrollbar">
             {['ALL', 'Men', 'Women'].map((gender) => (
@@ -515,7 +733,6 @@ const CatalogPage = ({ onProductClick, activeBrand, setActiveBrand }) => {
           </div>
         </div>
 
-        {/* Сетка товаров */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in duration-500">
             {filteredProducts.map((product) => (
@@ -639,6 +856,7 @@ export default function App() {
   const [currentRoute, setCurrentRoute] = useState('home');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeBrandFilter, setActiveBrandFilter] = useState('ALL');
 
@@ -677,7 +895,7 @@ export default function App() {
             <span className="font-serif text-2xl font-bold uppercase tracking-tighter text-black transition-opacity duration-300 hover:opacity-70">AUREN</span>
           </div>
           <div className="flex-1 flex justify-end">
-            <button className="p-2 text-black hover:opacity-60 transition-opacity duration-500 ease-out">
+            <button onClick={() => setIsSearchOpen(true)} className="p-2 text-black hover:opacity-60 transition-opacity duration-500 ease-out">
               <SearchIcon active={false} />
             </button>
           </div>
@@ -689,6 +907,13 @@ export default function App() {
         product={selectedProduct} 
         onClose={() => setSelectedProduct(null)} 
         onAddToCart={handleAddToCartFromModal} 
+      />
+
+      {/* УМНЫЙ ПОИСК (ОВЕРЛЕЙ) */}
+      <SearchOverlay 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+        onProductClick={setSelectedProduct} 
       />
 
       {/* КОРЗИНА */}
